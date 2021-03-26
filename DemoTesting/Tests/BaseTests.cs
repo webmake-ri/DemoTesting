@@ -13,11 +13,6 @@ namespace DemoTesting
     {
         private MainPage mainPage;
 
-        //[OneTimeSetUp]
-        //public void GenerateReportBeforeTests()
-        //{
-        //    ExtentReport.Instance.InitializeTest();
-        //}
         [SetUp]
         public void BeforeTest()
         {
@@ -31,15 +26,19 @@ namespace DemoTesting
             mainPage.OpenStartUrl();
             Assert.AreEqual(WebDriver.driver.Url, Utils.Constants.Site_Url);
         }
-
+        [Test]
+        public void TestFailed()
+        {
+            mainPage.OpenStartUrl();
+            Assert.AreEqual(WebDriver.driver.Url, "https://google.com");
+        }
         [TearDown]
         public void AfterTest()
         {
-            TestStatus status = TestContext.CurrentContext.Result.Outcome.Status;
-            if (status == TestStatus.Failed)
+            Status status = (Status)TestContext.CurrentContext.Result.Outcome.Status;
+            if (status == Status.Fail)
             {
                 Console.WriteLine("Test was failed");
-                //ReportHelper.ExtentReport.Instance.AddScreenToLog(status);
             }
             ReportHelper.ExtentReport.Instance.FinalizeTest();
             WebDriver.Destroy();
