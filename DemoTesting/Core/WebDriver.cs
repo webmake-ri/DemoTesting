@@ -1,5 +1,4 @@
-﻿using Allure.Commons;
-using OpenQA.Selenium;
+﻿using OpenQA.Selenium;
 using OpenQA.Selenium.Chrome;
 using OpenQA.Selenium.Support.Events;
 using OpenQA.Selenium.Support.Extensions;
@@ -28,12 +27,6 @@ namespace DemoTesting.Core
 
             EventFiringWebDriver eventsDriver = new EventFiringWebDriver(driver);
             return eventsDriver;
-        }
-        public static void MakeScreenShot()
-        {
-            AllureLifecycle.Instance.AddAttachment($"Screenshot [{DateTime.Now:HH:mm:ss}]",
-                 "image/png",
-                 driver.TakeScreenshot().AsByteArray);
         }
         public static void Destroy()
         {

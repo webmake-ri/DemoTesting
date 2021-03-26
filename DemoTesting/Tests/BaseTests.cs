@@ -1,23 +1,27 @@
 using NUnit.Framework;
-using NUnit.Allure.Attributes;
-using NUnit.Allure.Core;
 using System;
 using DemoTesting.Core;
 using DemoTesting.Pages;
 using NUnit.Framework.Interfaces;
+using DemoTesting.ReportHelper;
+using AventStack.ExtentReports;
 
 namespace DemoTesting
 {
     [TestFixture]
-    [AllureNUnit]
-    [AllureDisplayIgnored]
     public class Tests
     {
         private MainPage mainPage;
 
+        //[OneTimeSetUp]
+        //public void GenerateReportBeforeTests()
+        //{
+        //    ExtentReport.Instance.InitializeTest();
+        //}
         [SetUp]
         public void BeforeTest()
         {
+            ExtentReport.Instance.InitializeTest();
             mainPage = new MainPage();            
         }
 
@@ -25,17 +29,19 @@ namespace DemoTesting
         public void OpenHomePage()
         {
             mainPage.OpenStartUrl();
+            Assert.AreEqual(WebDriver.driver.Url, Utils.Constants.Site_Url);
         }
 
         [TearDown]
         public void AfterTest()
         {
-            var status = TestContext.CurrentContext.Result.Outcome.Status;
+            TestStatus status = TestContext.CurrentContext.Result.Outcome.Status;
             if (status == TestStatus.Failed)
             {
                 Console.WriteLine("Test was failed");
-                WebDriver.MakeScreenShot();
+                //ReportHelper.ExtentReport.Instance.AddScreenToLog(status);
             }
+            ReportHelper.ExtentReport.Instance.FinalizeTest();
             WebDriver.Destroy();
         }
     }
