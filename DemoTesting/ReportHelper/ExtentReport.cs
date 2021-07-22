@@ -1,9 +1,12 @@
 ﻿using AventStack.ExtentReports;
 using AventStack.ExtentReports.Reporter;
+using DemoTesting.Core;
 using NUnit.Framework;
 using NUnit.Framework.Interfaces;
+using OpenQA.Selenium;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Text;
 
@@ -15,7 +18,7 @@ namespace DemoTesting.ReportHelper
 		private ExtentTest test;
 		private static ExtentReport instance;
 		private static string pathToLogFolder;
-		private int screenshotCount;
+		//private int screenshotCount;
 		/// <summary>
 		/// Implement the singleton for class ReportHelper
 		/// </summary>
@@ -34,7 +37,7 @@ namespace DemoTesting.ReportHelper
 		private ExtentReport()
 		{
 			extent = new ExtentReports();
-			pathToLogFolder = $"ExtentReports\\TestsResult{DateTime.Now.ToString(" hh-mm (dd.MM.yyyy)")}\\";
+			pathToLogFolder = $"ExtentReports\\TestsResult{DateTime.Now:hh-mm(dd.MM.yyyy)}\\";
 			var reporter = new ExtentHtmlReporter(pathToLogFolder);
 			extent.AttachReporter(reporter);
 		}
@@ -71,12 +74,15 @@ namespace DemoTesting.ReportHelper
 			{
 				case TestStatus.Failed:
 					logstatus = Status.Fail;
-					/*if (!isApiTest)
-					{
-						AddScreenToLog(logstatus);
-					}*/
 					test.Log(logstatus, TestContext.CurrentContext.Result.Message);
 					test.Log(logstatus, TestContext.CurrentContext.Result.StackTrace);
+					if (!isApiTest)
+					{
+						Screenshot file = ((ITakesScreenshot)WebDriver.CurrentDriver).GetScreenshot();
+						file.SaveAsFile(pathToLogFolder + "screenshot.png", ScreenshotImageFormat.Png);
+
+						test.Fail("ScreenShot: ", MediaEntityBuilder.CreateScreenCaptureFromPath(Path.GetFullPath(pathToLogFolder + "screenshot.png")).Build());
+					}
 					break;
 				case TestStatus.Inconclusive:
 					logstatus = Status.Warning;
@@ -89,31 +95,6 @@ namespace DemoTesting.ReportHelper
 					break;
 			}
 			test.Log(logstatus, "Test ended with " + logstatus);
-			extent.Flush();
-		}
-
-		public void AddScreenToLog(TestStatus status)
-		{
-			var mediaModel = MediaEntityBuilder.CreateScreenCaptureFromPath("screenshot.png").Build();
-			test.Fail("details", mediaModel);
-
-			// or:
-			test.Fail("details",
-				MediaEntityBuilder.CreateScreenCaptureFromPath("screenshot.png").Build());
-		}
-
-		public void Info(string text)
-		{
-			test.Log(Status.Info, text);
-		}
-
-		public void Warn(string text)
-		{
-			test.Log(Status.Warning, text);
-		}
-
-		public void CleanUpReporting()
-		{
 			extent.Flush();
 		}
 	}
